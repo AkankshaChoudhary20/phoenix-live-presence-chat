@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" style="scrollbar-gutter: stable;">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="Presence Chat">
+      {assigns[:page_title]}
+    </.live_title>
+    <link rel="stylesheet" href={~p"/assets/app.css"} />
+    <%!--
+      This demo needs exactly one thing from the client: the LiveView
+      websocket client itself, which is what turns server-rendered HTML
+      diffs into DOM patches. There is no application javascript of our
+      own anywhere in this project -- no bundler, no hooks, no fetch
+      calls. Loading Phoenix's own client libraries from a CDN (rather
+      than bundling them with esbuild) keeps the project runnable with
+      nothing but the BEAM: no Node.js toolchain required.
+    --%>
+    <script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.14/priv/static/phoenix.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/phoenix_html@4.1.1/priv/static/phoenix_html.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/phoenix_live_view@0.20.17/priv/static/phoenix_live_view.min.js">
+    </script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const csrfToken = document
+          .querySelector("meta[name='csrf-token']")
+          .getAttribute("content");
+        const liveSocket = new window.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
+          params: { _csrf_token: csrfToken }
+        });
+        liveSocket.connect();
+        window.liveSocket = liveSocket;
+      });
+    </script>
+  </head>
+  <body>
+    {@inner_content}
+  </body>
+</html>

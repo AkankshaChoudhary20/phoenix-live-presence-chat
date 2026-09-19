@@ -1,0 +1,57 @@
+<div class="page">
+  <header class="header">
+    <h1>Presence Chat</h1>
+    <p class="subtitle">
+      Room <code>{@room_id}</code> &middot; powered by Phoenix.Presence + Phoenix.PubSub, no custom JS
+    </p>
+  </header>
+
+  <%= if @joined? do %>
+    <div class="layout">
+      <aside class="presence-panel">
+        <h2>Who's here ({length(@presences)})</h2>
+        <ul class="presence-list">
+          <li :for={p <- @presences} class={["presence-item", p.name == @display_name && "presence-item--me"]}>
+            <span class="dot"></span>{p.name}
+          </li>
+        </ul>
+      </aside>
+
+      <section class="chat-panel">
+        <div class="messages" id="messages" phx-update="replace">
+          <p :if={@messages == []} class="messages-empty">No messages yet. Say hello!</p>
+          <div :for={m <- @messages} class={["message", m.system? && "message--system"]}>
+            <span :if={!m.system?} class="message-name">{m.name}</span>
+            <span class="message-body">{m.body}</span>
+          </div>
+        </div>
+
+        <form phx-submit="send_message" class="composer" id="composer">
+          <input
+            type="text"
+            name="body"
+            value={@message_input}
+            placeholder="Say something to the room..."
+            autocomplete="off"
+            maxlength="500"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+  <% else %>
+    <form phx-submit="join" class="join-form">
+      <label for="display_name">Pick a display name to join the room</label>
+      <input
+        type="text"
+        id="display_name"
+        name="display_name"
+        placeholder="e.g. Ada"
+        autocomplete="off"
+        maxlength="30"
+        required
+      />
+      <button type="submit">Join room</button>
+    </form>
+  <% end %>
+</div>
