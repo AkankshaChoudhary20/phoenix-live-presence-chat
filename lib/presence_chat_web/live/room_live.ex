@@ -51,6 +51,8 @@ defmodule PresenceChatWeb.RoomLive do
   end
 
   @impl true
+  def handle_event("join", _params, %{assigns: %{joined?: true}} = socket), do: {:noreply, socket}
+
   def handle_event("join", %{"display_name" => raw_name}, socket) do
     name = Message.format_display_name(raw_name)
     topic = socket.assigns.topic
@@ -77,6 +79,8 @@ defmodule PresenceChatWeb.RoomLive do
   end
 
   @impl true
+  def handle_event("send_message", _params, %{assigns: %{joined?: false}} = socket), do: {:noreply, socket}
+
   def handle_event("send_message", %{"body" => body}, socket) do
     case Message.validate_body(body) do
       {:ok, clean_body} ->
