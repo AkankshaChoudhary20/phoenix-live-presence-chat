@@ -8,13 +8,14 @@ defmodule PresenceChat.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      PresenceChatWeb.Telemetry,
       {Phoenix.PubSub, name: PresenceChat.PubSub},
       # Tracks who is present in each chat room via Phoenix.Presence. This
       # is a real OTP process (backed by Phoenix.Tracker) replicated across
       # nodes via the PubSub server above -- not an in-memory list owned by
       # a single LiveView.
       PresenceChatWeb.Presence,
+      # Telemetry polls Presence immediately, so start its dependency first.
+      PresenceChatWeb.Telemetry,
       PresenceChatWeb.Endpoint
     ]
 
