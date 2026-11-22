@@ -53,7 +53,8 @@ defmodule PresenceChatWeb.RoomLive do
   @impl true
   def handle_event("join", _params, %{assigns: %{joined?: true}} = socket), do: {:noreply, socket}
 
-  def handle_event("join", %{"display_name" => raw_name}, socket) do
+  def handle_event("join", %{"display_name" => raw_name}, socket)
+      when is_binary(raw_name) or is_nil(raw_name) do
     name = Message.format_display_name(raw_name)
     topic = socket.assigns.topic
 
@@ -78,10 +79,12 @@ defmodule PresenceChatWeb.RoomLive do
     {:noreply, socket}
   end
 
+  def handle_event("join", _params, socket), do: {:noreply, socket}
+
   @impl true
   def handle_event("send_message", _params, %{assigns: %{joined?: false}} = socket), do: {:noreply, socket}
 
-  def handle_event("send_message", %{"body" => body}, socket) do
+  def handle_event("send_message", %{"body" => body}, socket) when is_binary(body) do
     case Message.validate_body(body) do
       {:ok, clean_body} ->
         broadcast_message(socket, socket.assigns.display_name, clean_body, system?: false)
@@ -94,6 +97,8 @@ defmodule PresenceChatWeb.RoomLive do
         {:noreply, assign(socket, message_input: "")}
     end
   end
+
+  def handle_event("send_message", _params, socket), do: {:noreply, socket}
 
   # Fired by Phoenix.Presence (via PubSub) whenever someone joins or
   # leaves this room's topic, on this node or any other connected node.
